@@ -530,6 +530,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const target = entry.target as HTMLElement;
             if (entry.isIntersecting) {
                 // Element is entering the viewport
+                target.style.removeProperty('opacity');
                 target.classList.add('animate-fade-in');
             } else {
                 // Element is leaving the viewport
