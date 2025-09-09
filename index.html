@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimative Navigation - Das Beste aus allen Codes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Grundlegende Stile & Variablen --- */
+        :root {
+            --background-start: #1d2b64;
+            --background-end: #f8cdda;
+            --text-color: #ffffff;
+            --accent-color: #0071e3;
+            --glass-bg: rgba(50, 50, 70, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --card-hover-bg: rgba(255, 255, 255, 0.15);
+            --dark-text-color: #1a232e;
+            --btn-accent: #6cf; /* Akzentfarbe für den Leuchteffekt */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--background-start), var(--background-end));
+            background-attachment: fixed;
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+        
+        /* --- Animationen --- */
+        @keyframes fade-in-anim {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slide-up-anim {
+            from { --animation-ty: 40px; }
+            to { --animation-ty: 0px; }
+        }
+
+        .animate-fade-in {
+            animation: fade-in-anim 1s ease-out forwards, slide-up-anim 1s ease-out forwards;
+        }
+
+        /* --- Permanenter Unschärfe-Effekt am Bildschirmrand --- */
+        .vignette-blur {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 98; /* Unter dem Header und Control Panel */
+            pointer-events: none; /* Ignoriert Mauseingaben */
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            /* Maske, um den Blur nur an den Rändern anzuwenden */
+            mask-image: linear-gradient(to bottom, 
+                black 0%,         /* Oben stark */
+                transparent 15%,  /* Übergang zu transparent */
+                transparent 85%,  /* Mitte klar */
+                black 100%       /* Unten wieder stark */
+            );
+            -webkit-mask-image: linear-gradient(to bottom, 
+                black 0%, 
+                transparent 15%, 
+                transparent 85%, 
+                black 100%
+            );
+        }
+        
+        /* --- Globale Komponenten --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .cta-button {
+            background: var(--accent-color);
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 5px 20px rgba(0, 113, 227, 0.3);
+            flex-shrink: 0;
+            will-change: transform, filter, opacity;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 113, 227, 0.5);
+        }
+
+        /* --- Glassmorphism Button --- */
+        .btn {
+            position: relative;
+            display: inline-block;
+            border: none;
+            background: transparent;
+            padding: 0;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            will-change: transform;
+            text-decoration: none;
+        }
+
+        .btn__inner {
+            display: block;
+            position: relative;
+            isolation: isolate;
+            padding: 14px 36px;
+            border-radius: 50px; /* Pillenform */
+            
+            /* Der eigentliche Glassmorphismus-Effekt */
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            
+            /* Feine, helle Kante */
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            
+            /* Subtiler Schatten für die Tiefenwirkung */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn__inner::before {
+            content: "";
+            position: absolute;
+            inset: -50%; 
+            background: radial-gradient(18rem 18rem at var(--mx, 50%) var(--my, 50%), rgba(108, 192, 255, 0.12), transparent 55%);
+            z-index: -1;
+            transition: opacity .25s ease;
+            opacity: 0;
+        }
+
+        .btn:hover .btn__inner {
+             background: rgba(255, 255, 255, 0.2);
+             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn:hover .btn__inner::before {
+            opacity: 1;
+        }
+        
+        .btn:focus-visible .btn__inner {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--background-start), 0 0 0 4px var(--btn-accent);
+        }
+
+        @keyframes press {
+            to {
+                transform: scale(0.93) translate(var(--bounce-tx, 0), var(--bounce-ty, 0));
+            }
+        }
+        
+        @keyframes release {
+            0% { transform: scale(0.93) translate(var(--bounce-tx, 0), var(--bounce-ty, 0)); }
+            80% { transform: scale(1.03) translate(var(--overshoot-tx, 0), var(--overshoot-ty, 0)); }
+            100% { transform: scale(1) translate(0, 0); }
+        }
+
+        .btn__inner.pressed {
+            animation: press 0.2s ease-out forwards;
+        }
+
+        .btn__inner.releasing {
+            animation: release 0.4s ease-out;
+        }
+
+        .btn__label {
+            display: inline-block;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            will-change: transform;
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            .btn, .btn__inner, .btn__label {
+                transition: none;
+                animation: none;
+            }
+        }
+
+        /* --- Header & Navigation (Interactive Island) --- */
+        header {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 900px;
+            z-index: 100;
+        }
+
+        nav.dynamic-island {
+            width: 100%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 8px;
+            width: 100%;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .nav-tabs input[type="radio"] {
+            display: none;
+        }
+        
+        .logo-style {
+            font-weight: 700;
+            font-size: 1.5em;
+            padding: 12px 20px;
+            flex-shrink: 0;
+        }
+        
+        .nav-links-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-tabs label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 25px;
+            font-size: 1em;
+            color: var(--text-color);
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            transition: color 0.4s ease;
+            white-space: nowrap;
+        }
+        
+        .nav-tabs.is-dragging label {
+            cursor: grabbing;
+        }
+
+        .liquid-glass {
+            position: absolute;
+            top: 8px;
+            bottom: 8px;
+            height: auto;
+            left: 0; /* Set initial left for positioning context */
+            border-radius: 50px;
+            background: var(--accent-color);
+            z-index: 1;
+            cursor: grab;
+        }
+        
+        /* --- Allgemeine Sektionen --- */
+        .content-section {
+            padding: 100px 0;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 100vh;
+            padding: 120px 20px 40px;
+        }
+
+        .hero h1, .hero p, .section-title, .btn-container-for-animation {
+            will-change: filter, opacity, transform;
+            transform: translateY(var(--animation-ty, 0px));
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 60px;
+        }
+
+        .content-grid {
+            position: relative;
+            transition: height 0.4s ease;
+        }
+
+        .content-card {
+            position: absolute;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 40px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transform: translate(var(--tx, 0px), var(--ty, 0px)) translateY(var(--animation-ty, 0px));
+            transition: transform 0.4s ease, background 0.3s ease, width 0.4s ease, height 0.4s ease;
+            will-change: transform, width, height, opacity; /* Performance-Optimierung für Animationen */
+        }
+
+        .content-card:hover {
+            transform: translate(var(--tx, 0px), calc(var(--ty, 0px) - 10px)) translateY(var(--animation-ty, 0px));
+            background: var(--card-hover-bg);
+        }
+
+        .content-card .icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .content-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .content-card p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 50px 20px;
+            margin-top: 100px;
+            border-top: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+        }
+
+        /* --- ULTIMATE: Control Panel für Einstellungen --- */
+        .control-panel {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            font-size: 0.9rem;
+            min-width: 200px;
+            z-index: 99;
+        }
+
+        .control-panel h3 {
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .control-panel label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .control-panel input[type="range"] {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .control-panel input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .nav-links-wrapper {
+                 display: none;
+            }
+            .nav-tabs {
+                justify-content: space-between;
+            }
+            .control-panel {
+                display: none; /* Hide on mobile */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="vignette-blur"></div>
+
+    <!-- ULTIMATE: Control Panel -->
+    <div class="control-panel">
+        <h3>🎛️ Navigation Settings</h3>
+        <label>
+            Bounce Level: <span id="bounceValue">Medium</span>
+            <input type="range" id="bounceSlider" min="1" max="3" value="2">
+        </label>
+        <label>
+            <input type="checkbox" id="stretchToggle" checked> Stretch Effect
+        </label>
+        <label>
+            Stretch Intensity: <span id="stretchValue">15%</span>
+            <input type="range" id="stretchSlider" min="5" max="25" value="15">
+        </label>
+        <label>
+            <input type="checkbox" id="snapToggle" checked> Snap to Labels
+        </label>
+    </div>
+
+    <header>
+        <nav class="dynamic-island">
+            <div class="nav-tabs">
+                <input type="radio" name="switch" id="switch-0" checked>
+                <label for="switch-0" data-target="#top" class="logo-style">bensoos</label>
+
+                <div class="nav-links-wrapper">
+                    <input type="radio" name="switch" id="switch-1">
+                    <label for="switch-1" data-target="#events">Events</label>
+
+                    <input type="radio" name="switch" id="switch-2">
+                    <label for="switch-2" data-target="#mediathek">Mediathek</label>
+
+                    <input type="radio" name="switch" id="switch-3">
+                    <label for="switch-3" data-target="#projekte">Projekte</label>
+                    
+                    <input type="radio" name="switch" id="switch-4">
+                    <label for="switch-4" data-target="#produkte">Produkte</label>
+                </div>
+                
+                <input type="radio" name="switch" id="switch-5">
+                <label for="switch-5" id="contact-label">Kontakt</label>
+
+                <div class="liquid-glass"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="top">
+            <h1>🚀 Die ultimative Navigation ist hier!</h1>
+            <p>Erlebe das Beste aus allen Welten: Flüssige Physik, intelligente Anpassung und vollständige Kontrolle über das Verhalten.</p>
+            <div class="btn-container-for-animation">
+                <a href="#events" class="btn" id="followBtn">
+                    <span class="btn__inner">
+                        <span class="btn__label">Jetzt testen</span>
+                    </span>
+                </a>
+            </div>
+        </section>
+
+        <section class="content-section" id="events">
+            <div class="container">
+                <h2 class="section-title">Events</h2>
+                <div class="content-grid">
+                    <div class="content-card">
+                        <div class="icon">🗓️</div>
+                        <h3>Webinar: Design Trends</h3>
+                        <p>Nehmen Sie an unserem Live-Webinar teil und erfahren Sie alles über die neuesten Trends im Webdesign.</p>
+                    </div>
+                    <div class="content-card">
+                        <div class="icon">🤝</div>
+                        <h3>Community Meetup</h3>
+                        <p>Treffen Sie Gleichgesinnte und tauschen Sie sich bei unserem nächsten Community-Event aus.</p>
+                    </div>
+                    <div class="content-card">
+                        <div class="icon">🏆</div>
+                        <h3>Award Verleihung</h3>
+                        <p>Wir feiern die besten Projekte des Jahres. Seien Sie dabei, wenn die Gewinner gekürt werden.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section" id="mediathek">
+            <div class="container">
+                <h2 class="section-title">Mediathek</h2>
+                <div class="content-grid">
+                    <div class="content-card">
+                        <div class="icon">🎥</div>
+                        <h3>Produktvideos</h3>
+                        <p>Sehen Sie unsere Produkte in Aktion und entdecken Sie alle Features im Detail.</p>
+                    </div>
+                     <div class="content-card">
+                        <div class="icon">📚</div>
+                        <h3>Whitepaper</h3>
+                        <p>Laden Sie unsere ausführlichen Guides und Analysen zu Branchenthemen herunter.</p>
+                    </div>
+                    <div class="content-card">
+                        <div class="icon">🎙️</div>
+                        <h3>Podcast</h3>
+                        <p>Hören Sie spannende Interviews mit Experten und Vordenkern aus der Design-Welt.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section" id="projekte">
+            <div class="container">
+                <h2 class="section-title">Projekte</h2>
+                <div class="content-grid">
+                    <div class="content-card">
+                        <div class="icon">🌐</div>
+                        <h3>Global Relaunch</h3>
+                        <p>Ein kompletter Marken-Relaunch für einen internationalen Technologiekonzern.</p>
+                    </div>
+                    <div class="content-card">
+                        <div class="icon">📱</div>
+                        <h3>Mobile App</h3>
+                        <p>Eine innovative App, die den Alltag vereinfacht und Nutzer begeistert.</p>
+                    </div>
+                    <div class="content-card">
+                        <div class="icon">🎨</div>
+                        <h3>Interaktive Kunst</h3>
+                        <p>Ein digitales Kunstprojekt, das Technologie und Kreativität auf neue Weise verbindet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section" id="produkte">
+            <div class="container">
+                <h2 class="section-title">Produkte</h2>
+                <div class="content-grid">
+                    <div class="content-card">
+                        <div class="icon">✨</div>
+                        <h3>Ultimate Navigation</h3>
+                        <p>Das Beste aus allen Welten: Anpassbare Physik, Stretch-Effekte und intelligentes Snapping.</p>
+                    </div>
+                    <div class="content-card">
+                        <div class="icon">🔒</div>
+                        <h3>Security Tool</h3>
+                        <p>Schützen Sie Ihre digitalen Assets mit unserer hochmodernen Sicherheitssoftware.</p>
+                    </div>
+                    <div class="content-card">
+                        <div class="icon">🚀</div>
+                        <h3>Performance Kit</h3>
+                        <p>Beschleunigen Sie Ihre Webseiten und Anwendungen auf ein neues Level.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 bensoos Inc. - Ultimate Edition</p>
+        </div>
+    </footer>
+
+    <script type="module" src="index.tsx"></script>
+
+</body>
+</html>
